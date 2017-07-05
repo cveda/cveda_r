@@ -82,6 +82,6 @@ for (filename in list.files(PSYTOOLS_PSC2_DIR)) {
     filepath <- file.path(PSYTOOLS_PROCESSED_DIR, filename)
     columns <- sub("\\.ms\\.", "[ms]", colnames(df))  # Response time [ms]
     columns <- gsub("\\.", " ", columns)
-    write.table(df, filepath, quote=FALSE, sep=",", na="",
+    write.table(df, filepath, sep=",", na="",
                 row.names=FALSE, col.names=columns)
 }
