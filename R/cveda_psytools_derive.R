@@ -35,20 +35,33 @@ library(Psytools)
 PSYTOOLS_PSC2_DIR <- "/cveda/databank/RAW/PSC1/psytools"
 PSYTOOLS_PROCESSED_DIR <- "/cveda/databank/processed/psytools"
 
+BOGUS <- list("cVEDA-cVEDA_MID-BASIC_DIGEST")
+
 
 derivation <- function(name) {
-    switch(name,
-           "cVEDA-cVEDA_SOCRATIS-BASIC_DIGEST"=deriveSOCRATIS,
-           "cVEDA-cVEDA_SST-BASIC_DIGEST"=deriveSST,
-           "cVEDA-cVEDA_KIRBY-BASIC_DIGEST"=deriveKIRBY,
-           "cVEDA-cVEDA_BART-BASIC_DIGEST"=deriveBART,
-           "cVEDA-cVEDA_ERT-BASIC_DIGEST"=deriveERT,
-           "cVEDA-cVEDA_MID-BASIC_DIGEST"=deriveMID,
-           "cVEDA-cVEDA_TMT-TMT_DIGEST"=deriveTMT,
-           "cVEDA-cVEDA_WCST-BASIC_DIGEST"=deriveWCST,
-           "cVEDA-cVEDA_CORSI-BASIC_DIGEST"=deriveCORSI,
-           "cVEDA-cVEDA_DS-BASIC_DIGEST"=deriveDS,
-           rotateQuestionnaire)  # default fits all other questionnaires
+    return (switch(name,
+                   "cVEDA-cVEDA_SOCRATIS-BASIC_DIGEST"=deriveSOCRATIS,
+                   "cVEDA-cVEDA_SST-BASIC_DIGEST"=deriveSST,
+                   "cVEDA-cVEDA_KIRBY-BASIC_DIGEST"=deriveKIRBY,
+                   "cVEDA-cVEDA_BART-BASIC_DIGEST"=deriveBART,
+                   "cVEDA-cVEDA_ERT-BASIC_DIGEST"=deriveERT,
+                   "cVEDA-cVEDA_MID-BASIC_DIGEST"=deriveMID,
+                   "cVEDA-cVEDA_TMT-TMT_DIGEST"=deriveTMT,
+                   "cVEDA-cVEDA_WCST-BASIC_DIGEST"=deriveWCST,
+                   "cVEDA-cVEDA_CORSI-BASIC_DIGEST"=deriveCORSI,
+                   "cVEDA-cVEDA_DS-BASIC_DIGEST"=deriveDS,
+                   rotateQuestionnaire))  # default fits all other questionnaires
+}
+
+
+quote <- function(x) {
+    if (class(x) == "character") {
+        # Escape double quotation marks by doubling them
+        x <- gsub('"', '""', x)
+        # Enclose in quotation marks strings with commas or quotation marks
+        x <- gsub('^(.*[",].*$)', '"\\1"', x)
+    }
+    return (x)
 }
 
 
@@ -57,6 +70,10 @@ for (filename in list.files(PSYTOOLS_PSC2_DIR)) {
     # The name of the questionnaire is based on the CSV file name
     name <- file_path_sans_ext(filename)
 
+    if (name %in% BOGUS) {
+        next
+    }
+
     # Read each exported CSV Psytools file into a data frame
     filepath <- file.path(PSYTOOLS_PSC2_DIR, filename)
     COL_CLASSES = c(
@@ -64,7 +81,7 @@ for (filename in list.files(PSYTOOLS_PSC2_DIR)) {
         "Block"="character",
         "Trial"="character",
         "Response.time..ms."="numeric")
-    df <- read.csv(filepath, colClasses=COL_CLASSES)
+    df <- read.csv(filepath, colClasses=COL_CLASSES, stringsAsFactors=FALSE)
 
     # Discard uncomplete trials
     df <- subset(df, df$Completed=='t')
@@ -78,10 +95,20 @@ for (filename in list.files(PSYTOOLS_PSC2_DIR)) {
     derivation_function <- derivation(name)
     df <- derivation_function(df)
 
+    # Extract "Age.band" from "User.code"
+    df$Age.band <- as.numeric(substr(df$User.code, 15, 15))
+    df$User.code <- substr(df$User.code, 1, 12)
+    df <- df[c(1, ncol(df), 2:(ncol(df)-1))]
+
+    # Roll our own quoting method
+    for (column in colnames(df)) {
+        df[,column] <- quote(df[,column])
+    }
+
     # Write data frame back to the processed CSV file
     filepath <- file.path(PSYTOOLS_PROCESSED_DIR, filename)
     columns <- sub("\\.ms\\.", "[ms]", colnames(df))  # Response time [ms]
     columns <- gsub("\\.", " ", columns)
-    write.table(df, filepath, sep=",", na="",
+    write.table(df, filepath, quote=FALSE, sep=",", na="",
                 row.names=FALSE, col.names=columns)
 }
