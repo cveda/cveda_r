@@ -35,7 +35,9 @@ library(Psytools)
 PSYTOOLS_PSC2_DIR <- "/cveda/databank/RAW/PSC1/psytools"
 PSYTOOLS_PROCESSED_DIR <- "/cveda/databank/processed/psytools"
 
-BOGUS <- list("cVEDA-cVEDA_MID-BASIC_DIGEST")
+BOGUS <- list("cVEDA-cVEDA_MID-BASIC_DIGEST",
+              "cVEDA-cVEDA_SST-BASIC_DIGEST",
+              "cVEDA-cVEDA_WCST-BASIC_DIGEST")
 
 
 derivation <- function(name) {
