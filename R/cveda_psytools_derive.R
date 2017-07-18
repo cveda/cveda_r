@@ -70,7 +70,7 @@ for (filename in list.files(PSYTOOLS_PSC2_DIR)) {
     df <- read.csv(filepath, colClasses=COL_CLASSES, stringsAsFactors=FALSE)
 
     # Discard uncomplete trials
-    df <- subset(df, df$Completed=='t')
+    df <- subset(df, Completed=='t')
     # Get rid of Demo, MOCK, NPPILOT and TEST user codes (PSC1-only)
     df <- subset(df, !grepl("Demo|MOCK|NPPILOT|TEST", User.code, ignore.case=TRUE))
 
