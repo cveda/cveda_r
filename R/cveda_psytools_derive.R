@@ -40,22 +40,6 @@ BOGUS <- list("cVEDA-cVEDA_MID-BASIC_DIGEST",
               "cVEDA-cVEDA_WCST-BASIC_DIGEST")
 
 
-derivation <- function(name) {
-    return (switch(name,
-                   "cVEDA-cVEDA_SOCRATIS-BASIC_DIGEST"=deriveSOCRATIS,
-                   "cVEDA-cVEDA_SST-BASIC_DIGEST"=deriveSST,
-                   "cVEDA-cVEDA_KIRBY-BASIC_DIGEST"=deriveKIRBY,
-                   "cVEDA-cVEDA_BART-BASIC_DIGEST"=deriveBART,
-                   "cVEDA-cVEDA_ERT-BASIC_DIGEST"=deriveERT,
-                   "cVEDA-cVEDA_MID-BASIC_DIGEST"=deriveMID,
-                   "cVEDA-cVEDA_TMT-TMT_DIGEST"=deriveTMT,
-                   "cVEDA-cVEDA_WCST-BASIC_DIGEST"=deriveWCST,
-                   "cVEDA-cVEDA_CORSI-BASIC_DIGEST"=deriveCORSI,
-                   "cVEDA-cVEDA_DS-BASIC_DIGEST"=deriveDS,
-                   rotateQuestionnaire))  # default fits all other questionnaires
-}
-
-
 quote <- function(x) {
     if (class(x) == "character") {
         # Escape double quotation marks by doubling them
@@ -94,8 +78,35 @@ for (filename in list.files(PSYTOOLS_PSC2_DIR)) {
     df$rowIndex <- seq_len(nrow(df))
 
     # Apply relevant derivation function to each questionnaire
-    derivation_function <- derivation(name)
-    df <- derivation_function(df)
+    if (name == "cVEDA-cVEDA_SOCRATIS-BASIC_DIGEST") {
+        df <- deriveSOCRATIS(df)
+    } else if (name == "cVEDA-cVEDA_SST-BASIC_DIGEST") {
+        df <- deriveSST(df)
+    } else if (name == "cVEDA-cVEDA_KIRBY-BASIC_DIGEST") {
+        df <- deriveKIRBY(df)
+    } else if (name == "cVEDA-cVEDA_BART-BASIC_DIGEST") {
+        df <- deriveBART(df)
+    } else if (name == "cVEDA-cVEDA_ERT-BASIC_DIGEST") {
+        df <- deriveERT(df)
+    } else if (name == "cVEDA-cVEDA_MID-BASIC_DIGEST") {
+        print(name)
+        df <- deriveMID(df)
+        print("DONE")
+    } else if (name == "cVEDA-cVEDA_TMT-TMT_DIGEST") {
+        df <- deriveTMT(df)
+    } else if (name == "cVEDA-cVEDA_WCST-BASIC_DIGEST") {
+        print(name)
+        df <- deriveWCST(df)
+        print("DONE")
+    } else if (name == "cVEDA-cVEDA_CORSI-BASIC_DIGEST") {
+        df <- deriveCORSI(df)
+    } else if (name == "cVEDA-cVEDA_DS-BASIC_DIGEST") {
+        df <- deriveDS(df)
+    } else {
+        print(name)
+        df <- rotateQuestionnaire(df)
+        print("DONE")
+    }
 
     # Extract "Age.band" from "User.code"
     df$Age.band <- as.numeric(substr(df$User.code, 15, 15))
