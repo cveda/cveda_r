@@ -35,12 +35,8 @@ library(Psytools)
 PSYTOOLS_PSC2_DIR <- "/cveda/databank/RAW/PSC1/psytools"
 PSYTOOLS_PROCESSED_DIR <- "/cveda/databank/processed/psytools"
 
-BOGUS <- list("cVEDA-cVEDA_MID-BASIC_DIGEST",
-              "cVEDA-cVEDA_SST-BASIC_DIGEST",
-              "cVEDA-cVEDA_WCST-BASIC_DIGEST")
 
-
-quote <- function(x) {
+escape <- function(x) {
     if (class(x) == "character") {
         # Escape double quotation marks by doubling them
         x <- gsub('"', '""', x)
@@ -55,10 +51,6 @@ quote <- function(x) {
 for (filename in list.files(PSYTOOLS_PSC2_DIR)) {
     # The name of the questionnaire is based on the CSV file name
     name <- file_path_sans_ext(filename)
-
-    if (name %in% BOGUS) {
-        next
-    }
 
     # Read each exported CSV Psytools file into a data frame
     filepath <- file.path(PSYTOOLS_PSC2_DIR, filename)
@@ -89,23 +81,17 @@ for (filename in list.files(PSYTOOLS_PSC2_DIR)) {
     } else if (name == "cVEDA-cVEDA_ERT-BASIC_DIGEST") {
         df <- deriveERT(df)
     } else if (name == "cVEDA-cVEDA_MID-BASIC_DIGEST") {
-        print(name)
         df <- deriveMID(df)
-        print("DONE")
     } else if (name == "cVEDA-cVEDA_TMT-TMT_DIGEST") {
         df <- deriveTMT(df)
     } else if (name == "cVEDA-cVEDA_WCST-BASIC_DIGEST") {
-        print(name)
         df <- deriveWCST(df)
-        print("DONE")
     } else if (name == "cVEDA-cVEDA_CORSI-BASIC_DIGEST") {
         df <- deriveCORSI(df)
     } else if (name == "cVEDA-cVEDA_DS-BASIC_DIGEST") {
         df <- deriveDS(df)
     } else {
-        print(name)
         df <- rotateQuestionnaire(df)
-        print("DONE")
     }
 
     # Extract "Age.band" from "User.code"
@@ -115,7 +101,7 @@ for (filename in list.files(PSYTOOLS_PSC2_DIR)) {
 
     # Roll our own quoting method
     for (column in colnames(df)) {
-        df[,column] <- quote(df[,column])
+        df[,column] <- escape(df[,column])
     }
 
     # Write data frame back to the processed CSV file
