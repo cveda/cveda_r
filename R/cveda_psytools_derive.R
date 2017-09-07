@@ -91,6 +91,8 @@ process <- function(psc2_dir, processed_dir) {
             d <- deriveCORSI(d)
         } else if (name == "cVEDA-cVEDA_DS-BASIC_DIGEST") {
             d <- deriveDS(d)
+        } else if (name == "cVEDA-cVEDA_FHQ-BASIC_DIGEST") {
+            d <- rotateQuestionnairePreserveBlock(d)
         } else {
             d <- rotateQuestionnaire(d)
         }
