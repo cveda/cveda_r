@@ -32,7 +32,7 @@ library(tools)
 library(Psytools)
 
 
-PSYTOOLS_PSC2_DIR <- "/cveda/databank/RAW/PSC1/psytools"
+PSYTOOLS_PSC2_DIR <- "/cveda/databank/RAW/PSC2/psytools"
 PSYTOOLS_PROCESSED_DIR <- "/cveda/databank/processed/psytools"
 
 
