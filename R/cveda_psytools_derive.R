@@ -67,6 +67,12 @@ process <- function(psc2_dir, processed_dir) {
         # Get rid of Demo, MOCK, NPPILOT and TEST user codes (PSC1-only)
         d <- subset(d, !grepl("Demo|MOCK|NPPILOT|TEST", User.code, ignore.case=TRUE))
 
+        # Skip files without data - they cannot be rotated!
+        if (nrow(d)) {
+            cat(name, ": skipping file without data\n")
+            next
+        }
+
         # Add an index to preserve order (to simplify eyeballing)
         d$rowIndex <- seq_len(nrow(d))
 
@@ -94,15 +100,7 @@ process <- function(psc2_dir, processed_dir) {
         } else if (name == "cVEDA-cVEDA_FHQ-BASIC_DIGEST" || name == "cVEDA-cVEDA_FHQ_FU1-BASIC_DIGEST") {
             d <- rotateQuestionnairePreserveBlock(d)
         } else {
-            x <- tryCatch(
-                d <- rotateQuestionnaire(d),
-                error = function(e) {
-                    cat(name, ":", conditionMessage(e), "\n")
-                }
-            )
-            if (class(x) == "NULL") {
-                next
-            }
+            d <- rotateQuestionnaire(d)
         }
 
         # Extract "Age.band" from "User.code"
