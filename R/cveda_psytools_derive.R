@@ -68,7 +68,7 @@ process <- function(psc2_dir, processed_dir) {
         d <- subset(d, !grepl("Demo|MOCK|NPPILOT|TEST", User.code, ignore.case=TRUE))
 
         # Skip files without data - they cannot be rotated!
-        if (nrow(d)) {
+        if (nrow(d) < 2) {
             cat(name, ": skipping file without data\n")
             next
         }
