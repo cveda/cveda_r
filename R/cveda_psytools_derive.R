@@ -94,7 +94,15 @@ process <- function(psc2_dir, processed_dir) {
         } else if (name == "cVEDA-cVEDA_FHQ-BASIC_DIGEST" || name == "cVEDA-cVEDA_FHQ_FU1-BASIC_DIGEST") {
             d <- rotateQuestionnairePreserveBlock(d)
         } else {
-            d <- rotateQuestionnaire(d)
+            x <- tryCatch(
+                d <- rotateQuestionnaire(d),
+                error = function(e) {
+                    cat(name, ":", conditionMessage(e), "\n")
+                }
+            )
+            if (class(x) == "NULL") {
+                next
+            }
         }
 
         # Extract "Age.band" from "User.code"
