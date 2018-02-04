@@ -69,7 +69,7 @@ process <- function(psc2_dir, processed_dir) {
 
         # Skip files without data - they cannot be rotated!
         if (nrow(d) < 2) {
-            cat(name, ": skipping file without data.\n")
+            cat(name, ": skipping file without data.", sep="", fill=TRUE)
             next
         }
 
