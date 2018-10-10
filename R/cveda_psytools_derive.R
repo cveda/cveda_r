@@ -108,11 +108,11 @@ process <- function(psc2_dir, processed_dir) {
         d$User.code <- substr(d$User.code, 1, 12)
         d <- d[c(1, ncol(d), 2:(ncol(d)-1))]
 
-        #Remake iteration field if iterations exist under multiple age bands for the same PSC
+        # Remake iteration field if iterations exist under multiple age bands for the same PSC
         d<-d[order(d$User.code, d$Completed.Timestamp),]
         d$Iteration<-unlist(tapply(d$User.code, d$User.code,seq_along))
 
-        #Select the first or last iteration - CRITERIA NEEDS TO BE CONFIRMED
+        # Select the first or last iteration - CRITERIA NEEDS TO BE CONFIRMED
         #  Currently using first for cognitive tasks ( completion is filtered above )
         #  And last complete for questionnaires ( everything else )
         if(grepl("MID|SOCRATIS|SST|BART|KIRBY|ERT|TMT|WCST|DS", name)) {
@@ -120,24 +120,18 @@ process <- function(psc2_dir, processed_dir) {
         } else {
              iterationFunction<-max
         }
-        d <-
-            merge (
-        d,
-            aggregate(Iteration ~ User.code,
-                        iterationFunction,
-                        data = d),
-                    by = c("User.code", "Iteration"),
-                    sort = FALSE
-                   )
-      
-        
+        d <- merge(d,
+                   aggregate(Iteration ~ User.code,
+                             iterationFunction,
+                             data = d),
+                   by = c("User.code", "Iteration"),
+                   sort = FALSE)
+
         # Roll our own quoting method
         for (column in colnames(d)) {
             d[,column] <- escape(d[,column])
         }
 
-        
-        
         # Write data frame back to the processed CSV file
         filepath <- file.path(processed_dir, filename)
         columns <- sub("\\.ms\\.", "[ms]", colnames(d))  # Response time [ms]
