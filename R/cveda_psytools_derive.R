@@ -104,13 +104,13 @@ process <- function(psc2_dir, processed_dir) {
         }
 
         # Extract "Age.band" from "User.code"
-        d$Age.band <- as.numeric(substr(d$User.code, 15, 15))
+        d$Age.band <- substr(d$User.code, 14, 15)
         d$User.code <- substr(d$User.code, 1, 12)
         d <- d[c(1, ncol(d), 2:(ncol(d)-1))]
 
         # Remake iteration field if iterations exist under multiple age bands for the same PSC
         d<-d[order(d$User.code, d$Completed.Timestamp),]
-        d$Iteration<-unlist(tapply(d$User.code, d$User.code,seq_along))
+        d$Iteration<-unlist(tapply(d$User.code, d$User.code, seq_along))
 
         # Select the first or last iteration - CRITERIA NEEDS TO BE CONFIRMED
         #  Currently using first for cognitive tasks ( completion is filtered above )
