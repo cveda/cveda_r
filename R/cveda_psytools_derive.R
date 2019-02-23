@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-# Copyright (c) 2017-2018 CEA
+# Copyright (c) 2017-2019 CEA
 #
 # This software is governed by the CeCILL license under French law and
 # abiding by the rules of distribution of free software. You can use,
@@ -112,9 +112,9 @@ process <- function(psc2_dir, processed_dir) {
         d<-d[order(d$User.code, d$Completed.Timestamp),]
         d$Iteration<-unlist(tapply(d$User.code, d$User.code, seq_along))
 
-        # Select the first or last iteration - CRITERIA NEEDS TO BE CONFIRMED
-        #  Currently using first for cognitive tasks ( completion is filtered above )
-        #  And last complete for questionnaires ( everything else )
+        # Select the first or last iteration
+        #  Currently using first for cognitive tasks (completion is filtered above)
+        #  And last complete for questionnaires (everything else)
         if(grepl("MID|SOCRATIS|SST|BART|KIRBY|ERT|TMT|WCST|DS", name)) {
              iterationFunction<-min
         } else {
