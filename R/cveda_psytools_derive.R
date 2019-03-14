@@ -47,6 +47,60 @@ escape <- function(x) {
 }
 
 
+derivation <- function(name) {
+  switch(
+    name,
+    "cVEDA-cVEDA_SOCRATIS-BASIC_DIGEST" = deriveSOCRATIS,
+    "cVEDA-cVEDA_SOCRATIS_FU1-BASIC_DIGEST" = deriveSOCRATIS,
+    "cVEDA-cVEDA_SST-BASIC_DIGEST" = deriveSST,
+    "cVEDA-cVEDA_SST_FU1-BASIC_DIGEST" = deriveSST,
+    "cVEDA-cVEDA_KIRBY-BASIC_DIGEST" = deriveKIRBY,
+    "cVEDA-cVEDA_KIRBY_FU1-BASIC_DIGEST" = deriveKIRBY,
+    "cVEDA-cVEDA_BART-BASIC_DIGEST" = deriveBART,
+    "cVEDA-cVEDA_BART_FU1-BASIC_DIGEST" = deriveBART,
+    "cVEDA-cVEDA_ERT-BASIC_DIGEST" = deriveERT,
+    "cVEDA-cVEDA_ERT_FU1-BASIC_DIGEST" = deriveERT,
+    "cVEDA-cVEDA_MID-BASIC_DIGEST" = deriveMID,
+    "cVEDA-cVEDA_TMT-TMT_DIGEST" = deriveTMT,
+    "cVEDA-cVEDA_TMT_FU1-TMT_DIGEST" = deriveTMT,
+    "cVEDA-cVEDA_WCST-BASIC_DIGEST" = deriveWCST,
+    "cVEDA-cVEDA_WCST_FU1-BASIC_DIGEST" = deriveWCST,
+    "cVEDA-cVEDA_CORSI-BASIC_DIGEST" = deriveCORSI,
+    "cVEDA-cVEDA_CORSI_FU1-BASIC_DIGEST" = deriveCORSI,
+    "cVEDA-cVEDA_DS-BASIC_DIGEST" = deriveDS,
+    "cVEDA-cVEDA_DS_FU1-BASIC_DIGEST" = deriveDS,
+    "cVEDA-cVEDA_APQ_CHILD-BASIC_DIGEST" = deriveAPQ,
+    "cVEDA-cVEDA_APQ_PARENT-BASIC_DIGEST" = deriveAPQ,
+    "cVEDA-cVEDA_FHQ-BASIC_DIGEST" = rotateQuestionnairePreserveBlock,
+    "cVEDA-cVEDA_FHQ_FU1-BASIC_DIGEST" = rotateQuestionnairePreserveBlock,
+    "cVEDA-cVEDA_BIG5-BASIC_DIGEST" = deriveBIG5,
+    "cVEDA-cVEDA_ASSIST-BASIC_DIGEST" = deriveASSIST,
+    "cVEDA-cVEDA_ASSIST_FU1-BASIC_DIGEST" = deriveASSIST,
+    "cVEDA-cVEDA_ASSIST_M_FU1-BASIC_DIGEST" = deriveASSIST,
+    "cVEDA-cVEDA_ASSIST_F_FU1-BASIC_DIGEST" = deriveASSIST,
+    "cVEDA-cVEDA_ACEIQ-BASIC_DIGEST" = deriveCvedaACEIQ,
+    "cVEDA-cVEDA_ACEIQ_FU1-BASIC_DIGEST" = deriveCvedaACEIQ,
+    "cVEDA-cVEDA_IFVCS-BASIC_DIGEST" = deriveIFVCS,
+    "cVEDA-cVEDA_ANTHROPOMETRY-BASIC_DIGEST" = deriveCvedaAnthropometry,
+    "cVEDA-cVEDA_ANTHROPOMETRY_FU1-BASIC_DIGEST" = deriveCvedaAnthropometry,
+    "cVEDA-cVEDA_PBI-BASIC_DIGEST" = derivePBI,
+    "cVEDA-cVEDA_PDS-BASIC_DIGEST" = deriveCvedaPDS,
+    "cVEDA-cVEDA_PDS_FU1-BASIC_DIGEST" = deriveCvedaPDS,
+    "cVEDA-cVEDA_SDQ_ADULT-BASIC_DIGEST" = deriveSDQ,
+    "cVEDA-cVEDA_SDQ_ADULT_FU1-BASIC_DIGEST" = deriveSDQ,
+    "cVEDA-cVEDA_SDQ_CHILD-BASIC_DIGEST" = deriveSDQ,
+    "cVEDA-cVEDA_SDQ_CHILD_FU1-BASIC_DIGEST" = deriveSDQ,
+    "cVEDA-cVEDA_SDQ_PARENT-BASIC_DIGEST" = deriveSDQ,
+    "cVEDA-cVEDA_SDQ_PARENT_FU1-BASIC_DIGEST" = deriveSDQ,
+    "cVEDA-cVEDA_SDQ_PARENT_SELF_FU1-BASIC_DIGEST" = deriveSDQ,
+    "cVEDA-cVEDA_SCQ-BASIC_DIGEST" = deriveSCQ,
+    "cVEDA-cVEDA_SCQ_FU1-BASIC_DIGEST" = deriveSCQ,
+    "cVEDA-cVEDA_SDIM-BASIC_DIGEST" = deriveCvedaSDIM,
+    "cVEDA-cVEDA_SDIM_FU1-BASIC_DIGEST" = deriveCvedaSDIM,
+    rotateQuestionnaire
+    )  # default fits all other questionnaires
+}
+
 process <- function(psc2_dir, processed_dir) {
     # Iterate over exported CSV Psytools files
     for (filename in list.files(psc2_dir)) {
@@ -72,37 +126,14 @@ process <- function(psc2_dir, processed_dir) {
             cat(name, ": skipping file without data.", sep="", fill=TRUE)
             next
         }
-
-        # Add an index to preserve order (to simplify eyeballing)
-        d$rowIndex <- seq_len(nrow(d))
-
+        
+        # Apply cVeda Custom Missings
+        d <- applyCvedaCustomMissings(d)
+        
         # Apply relevant derivation function to each questionnaire
-        if (name == "cVEDA-cVEDA_SOCRATIS-BASIC_DIGEST") {
-            d <- deriveSOCRATIS(d)
-        } else if (name == "cVEDA-cVEDA_SST-BASIC_DIGEST") {
-            d <- deriveSST(d)
-        } else if (name == "cVEDA-cVEDA_KIRBY-BASIC_DIGEST") {
-            d <- deriveKIRBY(d)
-        } else if (name == "cVEDA-cVEDA_BART-BASIC_DIGEST") {
-            d <- deriveBART(d)
-        } else if (name == "cVEDA-cVEDA_ERT-BASIC_DIGEST") {
-            d <- deriveERT(d)
-        } else if (name == "cVEDA-cVEDA_MID-BASIC_DIGEST") {
-            d <- deriveMID(d)
-        } else if (name == "cVEDA-cVEDA_TMT-TMT_DIGEST") {
-            d <- deriveTMT(d)
-        } else if (name == "cVEDA-cVEDA_WCST-BASIC_DIGEST") {
-            d <- deriveWCST(d)
-        } else if (name == "cVEDA-cVEDA_CORSI-BASIC_DIGEST") {
-            d <- deriveCORSI(d)
-        } else if (name == "cVEDA-cVEDA_DS-BASIC_DIGEST") {
-            d <- deriveDS(d)
-        } else if (name == "cVEDA-cVEDA_FHQ-BASIC_DIGEST" || name == "cVEDA-cVEDA_FHQ_FU1-BASIC_DIGEST") {
-            d <- rotateQuestionnairePreserveBlock(d)
-        } else {
-            d <- rotateQuestionnaire(d)
-        }
-
+        derivation_function <- derivation(name)
+        d <- derivation_function(d)
+        
         # Extract "Age.band" from "User.code"
         d$Age.band <- substr(d$User.code, 14, 15)
         d$User.code <- substr(d$User.code, 1, 12)
