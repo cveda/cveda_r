@@ -101,6 +101,7 @@ derivation <- function(name) {
     )  # default fits all other questionnaires
 }
 
+
 process <- function(psc2_dir, processed_dir) {
     # Iterate over exported CSV Psytools files
     for (filename in list.files(psc2_dir)) {
@@ -126,15 +127,15 @@ process <- function(psc2_dir, processed_dir) {
             cat(name, ": skipping file without data.", sep="", fill=TRUE)
             next
         }
-        
+
         # Apply cVeda Custom Missings
         d <- applyCvedaCustomMissings(d)
-        
+
         # Apply relevant derivation function to each questionnaire
         derivation_function <- derivation(name)
         withCallingHandlers(d <- derivation_function(d),
            warning = function(w) print(paste(name, w)))
-        
+
         # Extract "Age.band" from "User.code"
         d$Age.band <- substr(d$User.code, 14, 15)
         d$User.code <- substr(d$User.code, 1, 12)
