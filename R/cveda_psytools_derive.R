@@ -132,7 +132,8 @@ process <- function(psc2_dir, processed_dir) {
         
         # Apply relevant derivation function to each questionnaire
         derivation_function <- derivation(name)
-        d <- derivation_function(d)
+        withCallingHandlers(d <- derivation_function(d),
+           warning = function(w) print(paste(name, w)))
         
         # Extract "Age.band" from "User.code"
         d$Age.band <- substr(d$User.code, 14, 15)
