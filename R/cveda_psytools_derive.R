@@ -146,9 +146,10 @@ process <- function(psc2_dir, processed_dir) {
         d$Iteration<-unlist(tapply(d$User.code, d$User.code, seq_along))
 
         # Select the first or last iteration
-        #  Currently using first for cognitive tasks (completion is filtered above)
-        #  And last complete for questionnaires (everything else)
-        if(grepl("MID|SOCRATIS|SST|BART|KIRBY|ERT|TMT|WCST|DS", name)) {
+        #  Currently using first iteration for cognitive tasks
+        #  (completion is filtered above) as well as KIRBY and SOCRATIS
+        #  and last complete iteration for all other questionnaires.
+        if (grepl("SST|BART|ERT|TMT|WCST|DS|CORSI|MID|KIRBY|SOCRATIS", name)) {
              iterationFunction<-min
         } else {
              iterationFunction<-max
