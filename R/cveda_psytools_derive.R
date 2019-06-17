@@ -142,8 +142,8 @@ process <- function(psc2_dir, processed_dir) {
         d <- d[c(1, ncol(d), 2:(ncol(d)-1))]
 
         # Remake iteration field if iterations exist under multiple age bands for the same PSC
-        d<-d[order(d$User.code, d$Completed.Timestamp),]
-        d$Iteration<-unlist(tapply(d$User.code, d$User.code, seq_along))
+        d <- d[order(d$User.code, d$Completed.Timestamp),]
+        d$Iteration <- unlist(tapply(d$User.code, d$User.code, seq_along))
 
         # Select the first or last iteration
         #  Currently using first complete iteration for cognitive tasks
@@ -157,14 +157,14 @@ process <- function(psc2_dir, processed_dir) {
             #   and then restarted after the timeout.
             #   however this does enable some degree of potential practice...
             # Discard incomplete if the Ppt has ever fully completed prior to iteration selection
-            iterationFunction<-min
-            d<-d[(d$Completed =='t' &
-                  d$User.code %in% d$User.code[d$Completed=='t']) |
-                 (d$Completed !='t' &
-                  !(d$User.code %in% d$User.code[d$Completed=='t'])),
-                 ]
+            iterationFunction <- min
+            d <- d[(d$Completed =='t' &
+                    d$User.code %in% d$User.code[d$Completed=='t']) |
+                   (d$Completed !='t' &
+                    !(d$User.code %in% d$User.code[d$Completed=='t'])),
+                  ]
         } else {
-             iterationFunction<-max
+             iterationFunction <- max
         }
         d <- merge(d,
                    aggregate(Iteration ~ User.code,
