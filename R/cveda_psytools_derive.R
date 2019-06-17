@@ -150,7 +150,19 @@ process <- function(psc2_dir, processed_dir) {
         #  (completion is filtered above) as well as KIRBY and SOCRATIS
         #  and last complete iteration for all other questionnaires.
         if (grepl("SST|BART|ERT|TMT|WCST|DS|CORSI|MID|KIRBY|SOCRATIS", name)) {
-             iterationFunction<-min
+            # For the TMT the derivation script updates
+            #   the completed flag to TimeOut if the task timed out
+            #   it is not unknown (~1% administrations in cVEDA) that 
+            #   the task was begun but was not engaged with
+            #   and then restarted after the timeout.
+            #   however this does enable some degree of potential practice...
+            # Discard incomplete if the Ppt has ever fully completed prior to iteration selection
+            iterationFunction<-min
+            d<-d[(d$Completed =='t' &
+                  d$User.code %in% d$User.code[d$Completed=='t']) | 
+                 (d$Completed !='t' &
+                    !(d$User.code %in% d$User.code[d$Completed=='t'])),
+                 ]
         } else {
              iterationFunction<-max
         }
