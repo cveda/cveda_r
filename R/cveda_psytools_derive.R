@@ -128,7 +128,7 @@ process <- function(psc2_dir, processed_dir) {
             next
         }
 
-        # Apply cVeda Custom Missings
+        # Apply c-VEDA Custom Missings
         d <- applyCvedaCustomMissings(d)
 
         # Apply relevant derivation function to each questionnaire
@@ -146,22 +146,22 @@ process <- function(psc2_dir, processed_dir) {
         d$Iteration<-unlist(tapply(d$User.code, d$User.code, seq_along))
 
         # Select the first or last iteration
-        #  Currently using first iteration for cognitive tasks
-        #  (completion is filtered above) as well as KIRBY and SOCRATIS
+        #  Currently using first complete iteration for cognitive tasks
+        #  as well as KIRBY and SOCRATIS (completion is filtered above)
         #  and last complete iteration for all other questionnaires.
         if (grepl("SST|BART|ERT|TMT|WCST|DS|CORSI|MID|KIRBY|SOCRATIS", name)) {
             # For the TMT the derivation script updates
             #   the completed flag to TimeOut if the task timed out
-            #   it is not unknown (~1% administrations in cVEDA) that 
+            #   it is not unknown (~1% administrations in c-VEDA) that
             #   the task was begun but was not engaged with
             #   and then restarted after the timeout.
             #   however this does enable some degree of potential practice...
             # Discard incomplete if the Ppt has ever fully completed prior to iteration selection
             iterationFunction<-min
             d<-d[(d$Completed =='t' &
-                  d$User.code %in% d$User.code[d$Completed=='t']) | 
+                  d$User.code %in% d$User.code[d$Completed=='t']) |
                  (d$Completed !='t' &
-                    !(d$User.code %in% d$User.code[d$Completed=='t'])),
+                  !(d$User.code %in% d$User.code[d$Completed=='t'])),
                  ]
         } else {
              iterationFunction<-max
