@@ -102,6 +102,73 @@ derivation <- function(name) {
 }
 
 
+deriveData <- function(d, name) {
+    # Apply relevant derivation function to each questionnaire
+    derivation_function <- derivation(name)
+    withCallingHandlers(d <- derivation_function(d),
+       warning = function(w) print(paste(name, w)))
+
+    # For the TMT the derivation script updates
+    #   the completed flag to TimeOut if the task timed out
+    #   it is not unknown (~1% administrations in c-VEDA) that
+    #   the task was begun but was not engaged with
+    #   and then restarted after the timeout.
+    #   however this does enable some degree of potential practice...
+    # Discard incomplete if the Ppt has ever fully completed prior to iteration selection
+    if(length(d$Completed[d$Completed!='t'])) {
+        d<-d[d$Completed =='t' | (d$Completed !='t' & 
+              !(d$User.code %in% d$User.code[d$Completed=='t'])),
+         ]
+    }
+    return(d)      
+}
+
+selectIterationAndSave <- function(d, iterationFunction, filename, fileSuffix="") {
+    # Extract "Age.band" from "User.code"
+    d$Age.band <- substr(d$User.code, 14, 15)
+    d$User.code <- substr(d$User.code, 1, 12)
+    d <- d[c(1, ncol(d), 2:(ncol(d)-1))]
+
+    #Remake iteration field if iterations exist under multiple age bands for the same PSC
+    # This proceedure works for long or wide data format now
+    iterations <-
+    aggregate(Iteration ~ User.code + Completed.Timestamp,
+              FUN = head,
+              1 ,
+              data = d[, c("User.code", "Iteration", "Completed.Timestamp")])
+    iterations <-
+        iterations[order(iterations$User.code, iterations$Completed.Timestamp), ]
+    iterations$newIteration <-
+        unlist(tapply(iterations$User.code, iterations$User.code, seq_along))
+    d <- merge(d, iterations, by = c("User.code", "Iteration"))
+    d$Iteration <- d$newIteration
+    d$newIteration <- NULL
+    rm(iterations)
+
+    d <- merge(d,
+       aggregate(Iteration ~ User.code,
+                 iterationFunction,
+                 data = d),
+       by = c("User.code", "Iteration"),
+       sort = FALSE)
+
+    # Roll our own quoting method
+    for (column in colnames(d)) {
+        d[,column] <- escape(d[,column])
+    }
+
+    # Write data frame back to the processed CSV file
+    filepath <- file.path(processed_dir, filename)
+    if (fileSuffix !="") {
+        filepath <- gsub(".csv", paste(fileSuffix, ".csv", sep=""), filepath)
+    }
+    columns <- sub("\\.ms\\.", "[ms]", colnames(d))  # Response time [ms]
+    columns <- gsub("\\.", " ", columns)
+    write.table(d, filepath, quote=FALSE, sep=",", na="",
+        row.names=FALSE, col.names=columns)
+}
+                      
+
 process <- function(psc2_dir, processed_dir) {
     # Iterate over exported CSV Psytools files
     for (filename in list.files(psc2_dir)) {
@@ -131,59 +198,16 @@ process <- function(psc2_dir, processed_dir) {
         # Apply c-VEDA Custom Missings
         d <- applyCvedaCustomMissings(d)
 
-        # Apply relevant derivation function to each questionnaire
-        derivation_function <- derivation(name)
-        withCallingHandlers(d <- derivation_function(d),
-           warning = function(w) print(paste(name, w)))
-
-        # Extract "Age.band" from "User.code"
-        d$Age.band <- substr(d$User.code, 14, 15)
-        d$User.code <- substr(d$User.code, 1, 12)
-        d <- d[c(1, ncol(d), 2:(ncol(d)-1))]
-
-        # Remake iteration field if iterations exist under multiple age bands for the same PSC
-        d <- d[order(d$User.code, d$Completed.Timestamp),]
-        d$Iteration <- unlist(tapply(d$User.code, d$User.code, seq_along))
-
         # Select the first or last iteration
         #  Currently using first complete iteration for cognitive tasks
         #  as well as KIRBY and SOCRATIS (completion is filtered above)
         #  and last complete iteration for all other questionnaires.
         if (grepl("SST|BART|ERT|TMT|WCST|DS|CORSI|MID|KIRBY|SOCRATIS", name)) {
-            # For the TMT the derivation script updates
-            #   the completed flag to TimeOut if the task timed out
-            #   it is not unknown (~1% administrations in c-VEDA) that
-            #   the task was begun but was not engaged with
-            #   and then restarted after the timeout.
-            #   however this does enable some degree of potential practice...
-            # Discard incomplete if the Ppt has ever fully completed prior to iteration selection
-            iterationFunction <- min
-            d <- d[(d$Completed =='t' &
-                    d$User.code %in% d$User.code[d$Completed=='t']) |
-                   (d$Completed !='t' &
-                    !(d$User.code %in% d$User.code[d$Completed=='t'])),
-                  ]
+            selectIterationAndSave(d, min, filename, "-RAW")
+            selectIterationAndSave(deriveData(d, name), min, filename)
         } else {
-             iterationFunction <- max
+            selectIterationAndSave(deriveData(d, name), max, filename)
         }
-        d <- merge(d,
-                   aggregate(Iteration ~ User.code,
-                             iterationFunction,
-                             data = d),
-                   by = c("User.code", "Iteration"),
-                   sort = FALSE)
-
-        # Roll our own quoting method
-        for (column in colnames(d)) {
-            d[,column] <- escape(d[,column])
-        }
-
-        # Write data frame back to the processed CSV file
-        filepath <- file.path(processed_dir, filename)
-        columns <- sub("\\.ms\\.", "[ms]", colnames(d))  # Response time [ms]
-        columns <- gsub("\\.", " ", columns)
-        write.table(d, filepath, quote=FALSE, sep=",", na="",
-                    row.names=FALSE, col.names=columns)
 
         # Try to avoid out-of-memory condition
         rm(d)
