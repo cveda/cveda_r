@@ -116,12 +116,13 @@ deriveData <- function(d, name) {
     #   however this does enable some degree of potential practice...
     # Discard incomplete if the Ppt has ever fully completed prior to iteration selection
     if(length(d$Completed[d$Completed!='t'])) {
-        d<-d[d$Completed =='t' | (d$Completed !='t' & 
+        d<-d[d$Completed =='t' | (d$Completed !='t' &
               !(d$User.code %in% d$User.code[d$Completed=='t'])),
          ]
     }
-    return(d)      
+    return(d)
 }
+
 
 selectIterationAndSave <- function(d, iterationFunction, filename, fileSuffix="") {
     # Extract "Age.band" from "User.code"
@@ -129,7 +130,7 @@ selectIterationAndSave <- function(d, iterationFunction, filename, fileSuffix=""
     d$User.code <- substr(d$User.code, 1, 12)
     d <- d[c(1, ncol(d), 2:(ncol(d)-1))]
 
-    #Remake iteration field if iterations exist under multiple age bands for the same PSC
+    # Remake iteration field if iterations exist under multiple age bands for the same PSC
     # This proceedure works for long or wide data format now
     iterations <-
     aggregate(Iteration ~ User.code + Completed.Timestamp,
@@ -165,9 +166,9 @@ selectIterationAndSave <- function(d, iterationFunction, filename, fileSuffix=""
     columns <- sub("\\.ms\\.", "[ms]", colnames(d))  # Response time [ms]
     columns <- gsub("\\.", " ", columns)
     write.table(d, filepath, quote=FALSE, sep=",", na="",
-        row.names=FALSE, col.names=columns)
+                row.names=FALSE, col.names=columns)
 }
-                      
+
 
 process <- function(psc2_dir, processed_dir) {
     # Iterate over exported CSV Psytools files
