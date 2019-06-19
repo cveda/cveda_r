@@ -201,7 +201,9 @@ process <- function(psc2_dir, processed_dir) {
         #  and last complete iteration for all other questionnaires.
         filepath <- file.path(processed_dir, filename)
         if (grepl("SST|BART|ERT|TMT|WCST|DS|CORSI|MID|KIRBY|SOCRATIS", name)) {
-            selectIterationAndSave(d, min, gsub(".csv", "-RAW.csv", filepath))
+            if (!grepl("KIRBY|SOCRATIS", name)) {
+                selectIterationAndSave(d, min, gsub(".csv", "-RAW.csv", filepath))
+            }
             selectIterationAndSave(deriveData(d, name), min, filepath)
         } else {
             selectIterationAndSave(deriveData(d, name), max, filepath)
