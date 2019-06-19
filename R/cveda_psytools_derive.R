@@ -124,7 +124,7 @@ deriveData <- function(d, name) {
 }
 
 
-selectIterationAndSave <- function(d, iterationFunction, filename, fileSuffix="") {
+selectIterationAndSave <- function(d, iterationFunction, filepath) {
     # Extract "Age.band" from "User.code"
     d$Age.band <- substr(d$User.code, 14, 15)
     d$User.code <- substr(d$User.code, 1, 12)
@@ -159,10 +159,6 @@ selectIterationAndSave <- function(d, iterationFunction, filename, fileSuffix=""
     }
 
     # Write data frame back to the processed CSV file
-    filepath <- file.path(processed_dir, filename)
-    if (fileSuffix !="") {
-        filepath <- gsub(".csv", paste(fileSuffix, ".csv", sep=""), filepath)
-    }
     columns <- sub("\\.ms\\.", "[ms]", colnames(d))  # Response time [ms]
     columns <- gsub("\\.", " ", columns)
     write.table(d, filepath, quote=FALSE, sep=",", na="",
@@ -203,11 +199,12 @@ process <- function(psc2_dir, processed_dir) {
         #  Currently using first complete iteration for cognitive tasks
         #  as well as KIRBY and SOCRATIS (completion is filtered above)
         #  and last complete iteration for all other questionnaires.
+        filepath <- file.path(processed_dir, filename)
         if (grepl("SST|BART|ERT|TMT|WCST|DS|CORSI|MID|KIRBY|SOCRATIS", name)) {
-            selectIterationAndSave(d, min, filename, "-RAW")
-            selectIterationAndSave(deriveData(d, name), min, filename)
+            selectIterationAndSave(d, min, gsub(".csv", "-RAW.csv", filepath))
+            selectIterationAndSave(deriveData(d, name), min, filepath)
         } else {
-            selectIterationAndSave(deriveData(d, name), max, filename)
+            selectIterationAndSave(deriveData(d, name), max, filepath)
         }
 
         # Try to avoid out-of-memory condition
