@@ -141,6 +141,7 @@ selectIterationAndSave <- function(d, iterationFunction, filepath) {
         iterations[order(iterations$User.code, iterations$Completed.Timestamp), ]
     iterations$newIteration <-
         unlist(tapply(iterations$User.code, iterations$User.code, seq_along))
+    iterations$Completed.Timestamp <- NULL
     d <- merge(d, iterations, by = c("User.code", "Iteration"))
     d$Iteration <- d$newIteration
     d$newIteration <- NULL
