@@ -126,8 +126,8 @@ deriveData <- function(d, name) {
 
 selectIterationAndSave <- function(d, iterationFunction, filepath) {
     # Extract "Age.band" from "User.code"
-    d$Age.band <- substr(d$User.code, 14, 15)
-    d$User.code <- substr(d$User.code, 1, 12)
+    d$Age.band <- substring(d$User.code, nchar(d$User.code) - 1)
+    d$User.code <- substring(d$User.code, 1, 12)
     d <- d[c(1, ncol(d), 2:(ncol(d)-1))]
 
     # Remake iteration field if iterations exist under multiple age bands for the same PSC
