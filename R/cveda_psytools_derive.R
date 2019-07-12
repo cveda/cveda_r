@@ -98,6 +98,7 @@ derivation <- function(name) {
     "cVEDA-cVEDA_SDIM-BASIC_DIGEST" = deriveCvedaSDIM,
     "cVEDA-cVEDA_SDIM_FU1-BASIC_DIGEST" = deriveCvedaSDIM,
     "cVEDA-cVEDA_AAQ-BASIC_DIGEST" = deriveAAQ,
+    "cVEDA-cVEDA_LEQ-BASIC_DIGEST" = deriveLEQ,
     rotateQuestionnaire
     )  # default fits all other questionnaires
 }
