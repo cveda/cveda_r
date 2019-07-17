@@ -32,8 +32,8 @@ library(tools)
 library(Psytools)
 
 
-PSYTOOLS_PSC2_DIR <- "/cveda/databank/RAW/PSC2/psytools"
-PSYTOOLS_PROCESSED_DIR <- "/cveda/databank/processed/psytools"
+PSYTOOLS_PSC1_DIR <- "/cveda/databank/RAW/PSC1/psytools"
+PSYTOOLS_DERIVED_DIR <- "/cveda/chroot/data/tmp/psytools"
 
 
 escape <- function(x) {
@@ -219,4 +219,4 @@ process <- function(psc2_dir, processed_dir) {
 }
 
 
-process(PSYTOOLS_PSC2_DIR, PSYTOOLS_PROCESSED_DIR)
+process(PSYTOOLS_PSC1_DIR, PSYTOOLS_DERIVED_DIR)
