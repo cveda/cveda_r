@@ -37,7 +37,7 @@ library(readxl)
 PSYTOOLS_PSC1_DIR <- "/cveda/databank/RAW/PSC1/psytools"
 PSYTOOLS_DERIVED_DIR <- "/cveda/chroot/data/tmp/psytools"
 PSYTOOLS_DATA_DICTIONARY_DIR <- "/cveda/databank/processed/data_dictionary/"
-
+PSYTOOLS_RESOURCE_FILE <- "/cveda/databank/framework/cveda_r/cVeda_Resources.xlsx"
 
 escape <- function(x) {
     if (class(x) == "character") {
