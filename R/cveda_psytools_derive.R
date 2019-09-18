@@ -237,7 +237,13 @@ process <- function(psc2_dir, processed_dir) {
             if (!grepl("KIRBY|SOCRATIS", name)) {
                 selectIterationAndSave(d, min, gsub(".csv", "-RAW.csv", filepath))
             }
-            selectIterationAndSave(deriveData(d, name), min, filepath)
+            if (grepl("SST", name)) {
+                d <- deriveData(d, name)
+                selectIterationAndSave(d[d$TaskVersion=='IMAGEN', ], min, gsub(".csv", "-IMAGEN.csv", filepath))
+                selectIterationAndSave(d[d$TaskVersion=='MARS', ], min, gsub(".csv", "-MARS.csv", filepath))
+            } else {
+                selectIterationAndSave(deriveData(d, name), min, filepath)
+            }
         } else {
             selectIterationAndSave(deriveData(d, name), max, filepath)
         }
