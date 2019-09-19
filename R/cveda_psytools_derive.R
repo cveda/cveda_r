@@ -40,15 +40,14 @@ PSYTOOLS_DATA_DICTIONARY_DIR <- "/cveda/databank/processed/data_dictionary/"
 PSYTOOLS_RESOURCE_FILE <- "/cveda/databank/framework/cveda_r/cVeda_Resources.xlsx"
 
 escape <- function(x) {
-    if (class(x) == "character") {
-        # Escape double quotation marks by doubling them
-        x <- gsub('"', '""', x)
-        # Enclose in quotation marks strings with commas or quotation marks
-        x <- gsub('^(.*[",].*$)', '"\\1"', x)
-    }
-    return (x)
+  if ("character" %in% class(x)) {
+    # Escape double quotation marks by doubling them
+    x <- gsub('"', '""', x)
+    # Enclose in quotation marks strings with commas or quotation marks
+    x <- gsub('^(.*[",\\;].*$)', '"\\1"', x)
+  }
+  return (x)
 }
-
 
 derivation <- function(name) {
   switch(
@@ -129,75 +128,93 @@ deriveData <- function(d, name) {
 }
 
 
-selectIterationAndSave <- function(d, iterationFunction, filepath) {
-    # Extract "Age.band" from "User.code"
-    d$Age.band <- substring(d$User.code, nchar(d$User.code) - 1)
-    d$User.code <- substring(d$User.code, 1, 12)
-    d <- d[c(1, ncol(d), 2:(ncol(d)-1))]
 
-    # Remake iteration field if iterations exist under multiple age bands for the same PSC
-    # This proceedure works for long or wide data format now
-    iterations <-
+selectIterationAndSave <- function(d, iterationFunction, filepath) {
+  options(datatable.print.nrows = 0)
+  setDT(d)
+
+  # Extract "Age.band" from "User.code"
+  d$Age.band <- substring(d$User.code, nchar(d$User.code) - 1)
+  d$User.code <- substring(d$User.code, 1, 12)
+  setcolorder(d,ncol(d))
+  #Remake iteration field if iterations exist under multiple age bands for the same PSC
+  # This proceedure works for long or wide data format now
+  iterations <-
     aggregate(Iteration ~ User.code + Completed.Timestamp,
               FUN = head,
               1 ,
               data = d[, c("User.code", "Iteration", "Completed.Timestamp")])
-    iterations <-
-        iterations[order(iterations$User.code, iterations$Completed.Timestamp), ]
-    iterations$newIteration <-
-        unlist(tapply(iterations$User.code, iterations$User.code, seq_along))
-    iterations$Completed.Timestamp <- NULL
-    d <- merge(d, iterations, by = c("User.code", "Iteration"))
-    d$Iteration <- d$newIteration
-    d$newIteration <- NULL
-    rm(iterations)
+  iterations <-
+    iterations[order(iterations$User.code, iterations$Completed.Timestamp), ]
+  iterations$newIteration <-
+    unlist(tapply(iterations$User.code, iterations$User.code, seq_along))
+  iterations$Completed.Timestamp <- NULL
+  setDT(iterations)
+  d <- d[iterations, on=c("User.code", "Iteration")]
+  d$Iteration <- d$newIteration
+  d$newIteration <- NULL
+  rm(iterations)
 
-    d <- merge(d,
-       aggregate(Iteration ~ User.code,
-                 iterationFunction,
-                 data = d),
-       by = c("User.code", "Iteration"),
-       sort = FALSE)
-
-    # Roll our own quoting method
-    for (column in colnames(d)) {
-        d[,column] <- escape(d[,column])
+  d <-
+    d[aggregate(Iteration ~ User.code,
+                iterationFunction,
+                data = d),
+      on = c("User.code", "Iteration")
+      ]
+  
+  setDF(d)
+  
+  # Roll our own quoting method
+  for (column in colnames(d)) {
+    d[,column] <- escape(d[,column])
+  }
+  
+  
+  # Write data frame back to the processed CSV file
+  columns <- sub("\\.ms\\.", "[ms]", colnames(d))  # Response time [ms]
+  columns <- gsub("\\.", " ", columns)
+  write.table(d, filepath, quote=FALSE, sep=",", na="",
+              row.names=FALSE, col.names=columns)
+  
+  # Label the df from the resources file if available and also save a labelled Stata version.
+  if(file.exists(PSYTOOLS_RESOURCE_FILE)) {
+    require(readxl)
+    require(haven)
+    taskName<-paste(unlist(strsplit(filepath, '-'))[2], 'EN', sep="_")
+    resourceSheets <-excel_sheets(PSYTOOLS_RESOURCE_FILE)
+    # The resources for baseline are used for FU tasks if there are no changes
+    if(!taskName %in% resourceSheets){
+      if(gsub("_FU[12]", "", taskName) %in% resourceSheets) {
+        taskName <-gsub("_FU[12]", "", taskName)
+      } else {
+        warning(paste0('Cannot Find Resource Sheet : ', taskName))
+        return()
+      }
     }
-
-    # Write data frame back to the processed CSV file
-    columns <- sub("\\.ms\\.", "[ms]", colnames(d))  # Response time [ms]
-    columns <- gsub("\\.", " ", columns)
-    write.table(d, filepath, quote=FALSE, sep=",", na="",
-                row.names=FALSE, col.names=columns)
-   # Extract the appropriate page from the Resources document and label
-   # If no labels can be found then there will be no zsav created
-    if(file.exists(PSYTOOLS_RESOURCE_FILE)) {
-        require(readxl)
-        require(haven)
-        filename<-paste(unlist(strsplit(filename, '-'))[2], 'EN', sep="_")
-        resources<-as.data.frame(read_xlsx(resourcesFile, sheet=filename, col_names = FALSE, .name_repair = make.names))
-        d<- labelData(d, resources)
-        write_sav(d, gsub('csv', 'zsav',filepath), compress=TRUE)
-        # This generates an Rmd Codebook - could be set to render it to html if you prefer
-        # Note the autogenerated labelling during derivations will be lost if the codebook saved at this stage
-        makeCodebook(d,
-                      file= paste0(PSYTOOLS_DATA_DICTIONARY_DIR, name, '.Rmd'),
-                      render=FALSE,
-                      openResult = FALSE,
-                      codebook = TRUE,
-                      replace = TRUE
-                     )
-
-      # # Stata requires no dots in the names and missings are represented differently
-        # names(d)<-gsub('[.]', '_', names(d))
-        # d[d==-666]<-tagged_na("-666")
-        # d[d==-777]<-tagged_na("-777")
-        # d[d==-888]<-tagged_na("-888")
-        # d[d==-999]<-tagged_na("-999")
-        # write_dta(d, gsub('csv', 'dta',filepath), version =14)
-    }
-}
-
+    resources<-as.data.frame(read_xlsx(PSYTOOLS_RESOURCE_FILE, sheet=taskName, col_names = FALSE, .name_repair = make.names))
+    d <- labelData(d, resources)
+    write_sav(d, gsub('csv', 'zsav',filepath), compress=TRUE)
+    # This generates an Rmd Codebook - could be set to render it to html if you prefer
+    # Note the autogenerated labelling during derivations will be lost if the codebook saved at this stage
+    makeCodebook(d,
+                 file= paste0(PSYTOOLS_DATA_DICTIONARY_DIR, name, '.Rmd'),
+                 render=FALSE,
+                 openResult = FALSE,
+                 codebook = TRUE,
+                 replace = TRUE
+    )
+    
+    # # Stata requires no dots in the names and missings are represented differently
+    # names(d)<-gsub('[.]', '_', names(d))
+    # d[d==-666]<-tagged_na("-666")
+    # d[d==-777]<-tagged_na("-777")
+    # d[d==-888]<-tagged_na("-888")
+    # d[d==-999]<-tagged_na("-999")
+    # write_dta(d, gsub('csv', 'dta',filepath), version =14)
+  }
+  gc()
+  options(datatable.print.nrows = 100)
+} 
 
 process <- function(psc2_dir, processed_dir) {
     # Iterate over exported CSV Psytools files
