@@ -236,7 +236,7 @@ process <- function(psc2_dir, processed_dir) {
         #  as well as KIRBY and SOCRATIS (completion is filtered above)
         #  and last complete iteration for all other questionnaires.
         filepath <- file.path(processed_dir, filename)
-        if (grepl("SST|BART|ERT|TMT|WCST|DS|CORSI|MID|KIRBY|SOCRATIS", name)) {
+        if (grepl("SST|BART|ERT|TMT|WCST|_DS-|CORSI|MID|KIRBY|SOCRATIS", name)) {
             if (!grepl("KIRBY|SOCRATIS", name)) {
                 selectIterationAndSave(d, min, gsub(".csv", "-RAW.csv", filepath))
             }
