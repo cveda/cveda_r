@@ -131,6 +131,8 @@ deriveData <- function(d, name) {
 selectIterationAndSave <- function(d, iterationFunction, filepath) {
     options(datatable.print.nrows = 0)
     setDT(d)
+    
+    if(nrow(d) ==0) { return(NULL) }
 
     # Extract "Age.band" from "User.code"
     d$Age.band <- substring(d$User.code, nchar(d$User.code) - 1)
