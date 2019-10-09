@@ -38,7 +38,7 @@ library(data.table)
 PSYTOOLS_PSC1_DIR <- "/cveda/databank/RAW/PSC1/psytools"
 PSYTOOLS_DERIVED_DIR <- "/cveda/chroot/data/tmp/psytools"
 PSYTOOLS_RESOURCE_FILE <- "/cveda/databank/documentation/psytools/cVEDA_resources_en.xlsx"
-PSYTOOLS_DATA_DICTIONARY_DIR <- "/cveda/databank/processed/data_dictionary"
+PSYTOOLS_DATA_DICTIONARY_DIR <- "/cveda/databank/documentation/psytools/data_dictionary"
 
 
 escape <- function(x) {
@@ -131,7 +131,7 @@ deriveData <- function(d, name) {
 selectIterationAndSave <- function(d, iterationFunction, filepath) {
     options(datatable.print.nrows = 0)
     setDT(d)
-    
+
     if(nrow(d) ==0) { return(NULL) }
 
     # Extract "Age.band" from "User.code"
