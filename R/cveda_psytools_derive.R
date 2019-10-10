@@ -170,8 +170,8 @@ selectIterationAndSave <- function(d, iterationFunction, filepath) {
 
     # Label the df from the resources file if available and also save a labelled Stata version.
     if (file.exists(PSYTOOLS_RESOURCE_FILE)) {
-        require(readxl)
-        require(haven)
+        require(readxl, quietly = TRUE)
+        require(haven, quietly = TRUE)
         taskName <- paste(unlist(strsplit(filepath, "-"))[2], "EN", sep = "_")
         resourceSheets <- excel_sheets(PSYTOOLS_RESOURCE_FILE)
         # The resources for baseline are used for FU tasks if there are no changes

@@ -62,8 +62,8 @@ process <- function(psc2_dir) {
        # Extract the appropriate page from the Resources document and label
        # If no labels can be found then there will be no zsav created
         if (file.exists(PSYTOOLS_RESOURCE_FILE)) {
-            require(readxl)
-            require(haven)
+            require(readxl, quietly = TRUE)
+            require(haven, quietly = TRUE)
             filename <- paste(unlist(strsplit(filename, "-"))[2], "EN", sep = "_")
             resources <- as.data.frame(read_xlsx(resourcesFile, sheet = filename,
                 col_names = FALSE, .name_repair = make.names))
