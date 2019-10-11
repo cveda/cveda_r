@@ -35,8 +35,8 @@ library(dataMaid)
 library(readxl)
 
 PSYTOOLS_PSC2_DIR <- "/cveda/databank/RAW/PSC2/psytools"
-PSYTOOLS_RESOURCE_FILE <- "/cveda/databank/framework/cveda_r/cVeda_Resources.xlsx"
-PSYTOOLS_DATA_DICTIONARY_DIR <- "/cveda/databank/processed/data_dictionary"
+PSYTOOLS_RESOURCE_FILE <- "/cveda/databank/documentation/psytools/cVEDA_resources_en.xlsx"
+#PSYTOOLS_DATA_DICTIONARY_DIR <- "/cveda/databank/processed/data_dictionary"
 
 
 process <- function(psc2_dir) {
