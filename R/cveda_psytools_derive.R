@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-# Copyright (c) 2017-2019 CEA
+# Copyright (c) 2017-2020 CEA
 #
 # This software is governed by the CeCILL license under French law and
 # abiding by the rules of distribution of free software. You can use,
@@ -132,7 +132,7 @@ selectIterationAndSave <- function(d, iterationFunction, filepath) {
     options(datatable.print.nrows = 0)
     setDT(d)
 
-    if(nrow(d) ==0) { return(NULL) }
+    if(nrow(d) == 0) { return(NULL) }
 
     # Extract "Age.band" from "User.code"
     d$Age.band <- substring(d$User.code, nchar(d$User.code) - 1)
