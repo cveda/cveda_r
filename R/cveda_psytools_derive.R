@@ -89,7 +89,7 @@ deriveData <- function(d, name) {
     } else if (grepl("^cVEDA-cVEDA_ANTHROPOMETRY", name)) {
         d <- deriveCvedaAnthropometry(d)
     } else if (grepl("^cVEDA-cVEDA_PBI", name)) {
-        d <- derivePBI(d)
+        d <- derivePBI(d, TRUE)
     } else if (grepl("^cVEDA-cVEDA_PDS", name)) {
         d <- deriveCvedaPDS(d)
     } else if (grepl("^cVEDA-cVEDA_SDQ", name)) {
