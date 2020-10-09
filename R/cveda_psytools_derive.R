@@ -52,66 +52,59 @@ escape <- function(x) {
 }
 
 
-derivation <- function(name) {
-    switch(name,
-        "cVEDA-cVEDA_SOCRATIS-BASIC_DIGEST" = deriveSOCRATIS,
-        "cVEDA-cVEDA_SOCRATIS_FU1-BASIC_DIGEST" = deriveSOCRATIS,
-        "cVEDA-cVEDA_SST-BASIC_DIGEST" = deriveSST,
-        "cVEDA-cVEDA_SST_FU1-BASIC_DIGEST" = deriveSST,
-        "cVEDA-cVEDA_KIRBY-BASIC_DIGEST" = deriveKIRBY,
-        "cVEDA-cVEDA_KIRBY_FU1-BASIC_DIGEST" = deriveKIRBY,
-        "cVEDA-cVEDA_BART-BASIC_DIGEST" = deriveBART,
-        "cVEDA-cVEDA_BART_FU1-BASIC_DIGEST" = deriveBART,
-        "cVEDA-cVEDA_ERT-BASIC_DIGEST" = deriveERT,
-        "cVEDA-cVEDA_ERT_FU1-BASIC_DIGEST" = deriveERT,
-        "cVEDA-cVEDA_MID-BASIC_DIGEST" = deriveMID,
-        "cVEDA-cVEDA_TMT-TMT_DIGEST" = deriveTMT,
-        "cVEDA-cVEDA_TMT_FU1-TMT_DIGEST" = deriveTMT,
-        "cVEDA-cVEDA_WCST-BASIC_DIGEST" = deriveWCST,
-        "cVEDA-cVEDA_WCST_FU1-BASIC_DIGEST" = deriveWCST,
-        "cVEDA-cVEDA_CORSI-BASIC_DIGEST" = deriveCORSI,
-        "cVEDA-cVEDA_CORSI_FU1-BASIC_DIGEST" = deriveCORSI,
-        "cVEDA-cVEDA_DS-BASIC_DIGEST" = deriveDS,
-        "cVEDA-cVEDA_DS_FU1-BASIC_DIGEST" = deriveDS,
-        "cVEDA-cVEDA_APQ_CHILD-BASIC_DIGEST" = deriveAPQ,
-        "cVEDA-cVEDA_APQ_PARENT-BASIC_DIGEST" = deriveAPQ,
-        "cVEDA-cVEDA_FHQ-BASIC_DIGEST" = rotateQuestionnairePreserveBlock,
-        "cVEDA-cVEDA_FHQ_FU1-BASIC_DIGEST" = rotateQuestionnairePreserveBlock,
-        "cVEDA-cVEDA_BIG5-BASIC_DIGEST" = deriveBIG5,
-        "cVEDA-cVEDA_ASSIST-BASIC_DIGEST" = deriveASSIST,
-        "cVEDA-cVEDA_ASSIST_FU1-BASIC_DIGEST" = deriveASSIST,
-        "cVEDA-cVEDA_ASSIST_M_FU1-BASIC_DIGEST" = deriveASSIST,
-        "cVEDA-cVEDA_ASSIST_F_FU1-BASIC_DIGEST" = deriveASSIST,
-        "cVEDA-cVEDA_ACEIQ-BASIC_DIGEST" = deriveCvedaACEIQ,
-        "cVEDA-cVEDA_ACEIQ_FU1-BASIC_DIGEST" = deriveCvedaACEIQ,
-        "cVEDA-cVEDA_IFVCS-BASIC_DIGEST" = deriveIFVCS,
-        "cVEDA-cVEDA_ANTHROPOMETRY-BASIC_DIGEST" = deriveCvedaAnthropometry,
-        "cVEDA-cVEDA_ANTHROPOMETRY_FU1-BASIC_DIGEST" = deriveCvedaAnthropometry,
-        "cVEDA-cVEDA_PBI-BASIC_DIGEST" = derivePBI,
-        "cVEDA-cVEDA_PDS-BASIC_DIGEST" = deriveCvedaPDS,
-        "cVEDA-cVEDA_PDS_FU1-BASIC_DIGEST" = deriveCvedaPDS,
-        "cVEDA-cVEDA_SDQ_ADULT-BASIC_DIGEST" = deriveSDQ,
-        "cVEDA-cVEDA_SDQ_ADULT_FU1-BASIC_DIGEST" = deriveSDQ,
-        "cVEDA-cVEDA_SDQ_CHILD-BASIC_DIGEST" = deriveSDQ,
-        "cVEDA-cVEDA_SDQ_CHILD_FU1-BASIC_DIGEST" = deriveSDQ,
-        "cVEDA-cVEDA_SDQ_PARENT-BASIC_DIGEST" = deriveSDQ,
-        "cVEDA-cVEDA_SDQ_PARENT_FU1-BASIC_DIGEST" = deriveSDQ,
-        "cVEDA-cVEDA_SDQ_PARENT_SELF_FU1-BASIC_DIGEST" = deriveSDQ,
-        "cVEDA-cVEDA_SCQ-BASIC_DIGEST" = deriveSCQ,
-        "cVEDA-cVEDA_SCQ_FU1-BASIC_DIGEST" = deriveSCQ,
-        "cVEDA-cVEDA_SDIM-BASIC_DIGEST" = deriveCvedaSDIM,
-        "cVEDA-cVEDA_SDIM_FU1-BASIC_DIGEST" = deriveCvedaSDIM,
-        "cVEDA-cVEDA_AAQ-BASIC_DIGEST" = deriveAAQ,
-        "cVEDA-cVEDA_LEQ-BASIC_DIGEST" = deriveLEQ,
-        rotateQuestionnaire)  # default fits all other questionnaires
-}
-
-
 deriveData <- function(d, name) {
     # Apply relevant derivation function to each questionnaire
-    derivation_function <- derivation(name)
-    withCallingHandlers(d <- derivation_function(d),
-        warning = function(w) print(paste(name, w)))
+    if (grepl("^cVEDA-cVEDA_SOCRATIS", name)) {
+        d <- deriveSOCRATIS(d)
+    } else if (grepl("^cVEDA-cVEDA_SST-BASIC", name)) {
+        d <- deriveSST(d)
+    } else if (grepl("^cVEDA-cVEDA_KIRBY", name)) {
+        d <- deriveKIRBY(d)
+    } else if (grepl("^cVEDA-cVEDA_BART", name)) {
+        d <- deriveBART(d)
+    } else if (grepl("^cVEDA-cVEDA_ERT", name)) {
+        d <- deriveERT(d)
+    } else if (grepl("^cVEDA-cVEDA_MID", name)) {
+        d <- deriveMID(d)
+    } else if (grepl("^cVEDA-cVEDA_TMT", name)) {
+        d <- deriveTMT(d)
+    } else if (grepl("^cVEDA-cVEDA_WCST", name)) {
+        d <- deriveWCST(d)
+    } else if (grepl("^cVEDA-cVEDA_CORSI", name)) {
+        d <- deriveCORSI(d)
+    } else if (grepl("^cVEDA-cVEDA_DS", name)) {
+        d <- deriveDS(d)
+    } else if (grepl("^cVEDA-cVEDA_APQ", name)) {
+        d <- deriveAPQ(d)
+    } else if (grepl("^cVEDA-cVEDA_FHQ", name)) {
+        d <- rotateQuestionnairePreserveBlock(d)
+    } else if (grepl("^cVEDA-cVEDA_BIG5", name)) {
+        d <- deriveBIG5(d)
+    } else if (grepl("^cVEDA-cVEDA_ASSIST", name)) {
+        d <- deriveASSIST(d)
+    } else if (grepl("^cVEDA-cVEDA_ACEIQ", name)) {
+        d <- deriveCvedaACEIQ(d)
+    } else if (grepl("^cVEDA-cVEDA_IFVCS", name)) {
+        d <- deriveIFVCS(d)
+    } else if (grepl("^cVEDA-cVEDA_ANTHROPOMETRY", name)) {
+        d <- deriveCvedaAnthropometry(d)
+    } else if (grepl("^cVEDA-cVEDA_PBI", name)) {
+        d <- derivePBI(d)
+    } else if (grepl("^cVEDA-cVEDA_PDS", name)) {
+        d <- deriveCvedaPDS(d)
+    } else if (grepl("^cVEDA-cVEDA_SDQ", name)) {
+        d <- deriveSDQ(d)
+    } else if (grepl("^cVEDA-cVEDA_SCQ", name)) {
+        d <- deriveSCQ(d)
+    } else if (grepl("^cVEDA-cVEDA_SDIM", name)) {
+        d <- deriveCvedaSDIM(d)
+    } else if (grepl("^cVEDA-cVEDA_AAQ", name)) {
+        d <- deriveAAQ(d)
+    } else if (grepl("^cVEDA-cVEDA_LEQ", name)) {
+        d <- deriveLEQ(d)
+    } else {  # default fits all other questionnaires
+        d <- rotateQuestionnaire(d)
+    }
 
     # For the TMT the derivation script updates
     #   the completed flag to TimeOut if the task timed out
