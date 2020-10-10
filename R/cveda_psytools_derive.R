@@ -89,7 +89,7 @@ deriveData <- function(d, name) {
     } else if (grepl("^cVEDA-cVEDA_ANTHROPOMETRY", name)) {
         d <- deriveCvedaAnthropometry(d)
     } else if (grepl("^cVEDA-cVEDA_PBI", name)) {
-        d <- derivePBI(d, TRUE)
+        d <- derivePBI(d)
     } else if (grepl("^cVEDA-cVEDA_PDS", name)) {
         d <- deriveCvedaPDS(d)
     } else if (grepl("^cVEDA-cVEDA_SDQ", name)) {
@@ -185,6 +185,11 @@ selectIterationAndSave <- function(d, iterationFunction, filepath) {
         # Must be run before MakeCodeBook if using Haven > 2.3
         for (v in names(d)) {
             class(d[,v]) = setdiff(class(d[,v]), "vctrs_vctr")
+        }
+
+        #Convert all character variables to ASCII to latex doesn't blow a fuse
+        for (col in names(which(sapply(d, is.character), useNames = TRUE))) {
+          data.table::set(d, j = col, value = iconv(d[[col]], from="UTF-8",to="ASCII//TRANSLIT"))
         }
 
         # This generates an Rmd Codebook and renders it to PDF (by default)
