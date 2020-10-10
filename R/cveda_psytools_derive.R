@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-# Copyright (c) 2017-2020 CEA
+# Copyright (c) 2017-2021 CEA
 #
 # This software is governed by the CeCILL license under French law and
 # abiding by the rules of distribution of free software. You can use,
@@ -187,9 +187,12 @@ selectIterationAndSave <- function(d, iterationFunction, filepath) {
             class(d[,v]) = setdiff(class(d[,v]), "vctrs_vctr")
         }
 
-        #Convert all character variables to ASCII to latex doesn't blow a fuse
+        # Convert all character variables to ASCII so LaTeX doesn't blow a fuse
         for (col in names(which(sapply(d, is.character), useNames = TRUE))) {
-          data.table::set(d, j = col, value = iconv(d[[col]], from="UTF-8",to="ASCII//TRANSLIT"))
+          data.table::set(d, j = col,
+                                 value = iconv(d[[col]],
+                                               from = "UTF-8",
+                                               to = "ASCII//TRANSLIT"))
         }
 
         # This generates an Rmd Codebook and renders it to PDF (by default)
