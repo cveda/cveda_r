@@ -129,8 +129,10 @@ selectIterationAndSave <- function(d, iterationFunction, filepath) {
 
     # Extract "Age.band" from "User.code"
     d$Age.band <- substring(d$User.code, nchar(d$User.code) - 1)
-    d$User.code <- substring(d$User.code, 1, 12)
-    setcolorder(d, ncol(d))
+    setcolorder(d,ncol(d))
+    # Trim "User.code" to just the PSC + FU.timepoint - we need to keep all FU timepoints attempted
+    d$User.code <- substring(d$User.code, 1, nchar(d$User.code) - 3)
+
     # Remake iteration field if iterations exist under multiple age bands for the
     # same PSC This proceedure works for long or wide data format now
     iterations <- aggregate(Iteration ~ User.code + Completed.Timestamp, FUN = head,
@@ -150,6 +152,14 @@ selectIterationAndSave <- function(d, iterationFunction, filepath) {
 
     setDF(d)
 
+    # Extract FU timepoint from "User.code"
+    d$FU.timepoint<-substring(d$User.code, 13)
+    d$FU.timepoint[d$FU.timepoint==""]<-"Baseline"
+    setcolorder(d,ncol(d))
+    
+    # Trim "User.code" to just the PSC
+    d$User.code <- substring(d$User.code, 1, 12)
+    
     # Roll our own quoting method
     for (column in colnames(d)) {
         d[, column] <- escape(d[, column])
