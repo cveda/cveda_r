@@ -134,7 +134,7 @@ selectIterationAndSave <- function(d, iterationFunction, filepath) {
     d$User.code <- substring(d$User.code, 1, nchar(d$User.code) - 3)
 
     # Remake iteration field if iterations exist under multiple age bands for the
-    # same PSC This proceedure works for long or wide data format now
+    # same PSC This procedure works for long or wide data format now
     iterations <- aggregate(Iteration ~ User.code + Completed.Timestamp, FUN = head,
         1, data = d[, c("User.code", "Iteration", "Completed.Timestamp")])
     iterations <- iterations[order(iterations$User.code, iterations$Completed.Timestamp),]
