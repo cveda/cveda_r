@@ -235,7 +235,7 @@ process <- function(psc2_dir, processed_dir) {
             Response.time..ms. = "numeric")
         d <- read.csv(filepath, colClasses = COL_CLASSES, stringsAsFactors = FALSE)
 
-        # Discard uncomplete trials
+        # Discard incomplete trials
         d <- subset(d, Completed == "t")
         # Get rid of Demo, MOCK, NPPILOT and TEST user codes (PSC1-only)
         d <- subset(d, !grepl("Demo|MOCK|NPPILOT|TEST", User.code, ignore.case = TRUE))
