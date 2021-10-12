@@ -56,6 +56,8 @@ deriveData <- function(d, name) {
     # Apply relevant derivation function to each questionnaire
     if (grepl("^cVEDA-cVEDA_SOCRATIS", name)) {
         d <- deriveSOCRATIS(d)
+    } else if (grepl("^cVEDA-cVEDA_EATQr_SELF", name)) {
+        d <- deriveCvedaEATQr(d)
     } else if (grepl("^cVEDA-cVEDA_SST", name)) {
         d <- deriveSST(d)
     } else if (grepl("^cVEDA-cVEDA_KIRBY", name)) {
